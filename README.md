@@ -74,8 +74,30 @@ python app.py
 ```
 #### Note: This version includes steps to create and activate the Conda environment with Python 3.11.9 0r above, ensuring users set up python environment correctly before installing dependencies and running the application.
 
+## 7. Challenges Faced
 
-## 7. Appendix - B
+-   **Prompt Engineering Complexity:** Crafting effective prompts to guide the LLM for accurate intent recognition, information extraction (especially into specific formats like the "I need a laptop with..." string or JSON for function calling), and consistent conversational flow required significant iteration and refinement.
+-   **Managing LLM Output Variability:** Ensuring consistent and parsable responses from the LLM, particularly for the `intent_confirmation_layer` and `product_map_layer`, was challenging due to the inherent non-deterministic nature of some LLM outputs.
+-   **Optimizing LLM Calls:** Initial designs might have involved excessive LLM calls (e.g., an LLM call to parse the output of another LLM call), leading to increased latency and cost. Optimizing this by requesting structured output (like JSON directly from `product_map_layer_to_json`) was a key consideration.
+-   **Data Preprocessing for Product Features:** Accurately classifying laptop features (e.g., 'GPU intensity', 'Display quality') from textual descriptions into discrete categories ('low', 'medium', 'high') using `product_map_layer` required careful prompt design and robust classification rules. Doing this on-the-fly for every comparison was inefficient.
+-   **State Management in Flask:** Managing conversation history (`conversation`, `conversation_bot`) and user-specific states (`top_3_laptops`) using global variables in Flask can be limiting for scalability and concurrent users.
+-   **Balancing LLM Flexibility with Rule-Based Precision:** Determining the optimal balance between leveraging the LLM's natural language capabilities and implementing deterministic rule-based functions (e.g., for scoring laptops) was crucial for overall system reliability.
+-   **Robust Error Handling:** Ensuring the application gracefully handles unexpected LLM responses, API errors, or invalid user inputs required careful error checking and fallback mechanisms.
+
+## 8. Lessons Learned
+
+-   **Iterative Prompt Development is Crucial:** Effective interaction with LLMs heavily relies on well-crafted prompts. Continuous testing, providing clear instructions, few-shot examples, and specifying output formats significantly improve LLM performance and reliability.
+-   **Prioritize Structured LLM Outputs:** Requesting LLMs to return information in structured formats (e.g., JSON) directly is more efficient and reliable than making subsequent LLM calls to parse free-form text.
+-   **Pre-computation for Efficiency:** For static or slowly changing data (like laptop specifications), pre-processing and storing structured features (e.g., the output of `product_map_layer_to_json`) significantly reduces runtime LLM calls and improves performance.
+-   **Strategic Use of Function Calling:** OpenAI's function calling is a powerful tool for extracting structured data from user queries, simplifying the process of building user profiles.
+-   **Modular Design Enhances Maintainability:** Separating concerns into different functions (e.g., `initialize_conversation`, `moderation_check`, `compare_laptops_with_user`) makes the codebase easier to understand, test, and maintain.
+-   **Combine LLMs with Deterministic Logic:** Leverage LLMs for their strengths in understanding and generating natural language, but use deterministic Python code for tasks requiring precise calculations, data manipulation (like scoring), and strict validation.
+-   **Importance of Input Validation and Moderation:** Implementing moderation checks for both user input and LLM-generated content is essential for creating a safe and reliable application.
+-   **Consider Session Management for Scalability:** For web applications intended to support multiple users, using Flask sessions or other appropriate state management techniques is preferable to global variables for handling user-specific data.
+-   **Clear System Messages Guide the LLM:** A well-defined system message that outlines the AI's role, constraints, and desired output format is fundamental to achieving consistent behavior.
+
+
+## 9. Appendix
 
 User output example screenshot:
 
@@ -89,3 +111,4 @@ User output example screenshot:
 
 
 ![Screenshot4](Images/screenshot4.png)
+
